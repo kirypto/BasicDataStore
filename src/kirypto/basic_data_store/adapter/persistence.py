@@ -17,10 +17,7 @@ class Sqlite3ItemPersistence(ItemPersistence):
             connection.cursor().execute(f"""
                     INSERT INTO items (identifier, value)
                     VALUES (:id, :value);
-            """, {
-                "value": item.value,
-                "id": str(item.id),
-            })
+            """, item)
 
     def retrieve_all(self) -> Set[UUID]:
         with sqlite3.connect(self._database_file) as connection:

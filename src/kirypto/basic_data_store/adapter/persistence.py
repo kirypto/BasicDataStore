@@ -38,4 +38,8 @@ class Sqlite3ItemPersistence(ItemPersistence):
             return Item(id=identifier, value=value)
 
     def delete(self, id: UUID) -> None:
-        raise NotImplementedError(f"{ItemPersistence.__name__}.delete has not been implemented")
+        with sqlite3.connect(self._database_file) as connection:
+            connection.cursor().execute(f"""
+                    DELETE FROM items
+                    WHERE identifier = '{str(id)}';
+            """)

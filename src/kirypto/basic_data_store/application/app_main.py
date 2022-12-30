@@ -30,6 +30,9 @@ class BasicDataStoreApp:
         first_id, *_ = ids
         retrieved_item = self._item_persistence.retrieve(first_id)
         print(f"~~> Retrieved item: {retrieved_item}")
+        self._item_persistence.delete(retrieved_item.id)
+        post_deletion_count = len(self._item_persistence.retrieve_all())
+        print(f"~~> Deleted {retrieved_item.id}, now only {post_deletion_count} remain")
 
 
 def random_string(count: int) -> str:

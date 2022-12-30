@@ -1,3 +1,4 @@
+import sqlite3
 from typing import Set
 from uuid import UUID
 
@@ -12,10 +13,20 @@ class Sqlite3ItemPersistence(ItemPersistence):
         self._database_file = database_file
 
     def save(self, item: Item) -> None:
-        raise NotImplementedError(f"{ItemPersistence.__name__}.save has not been implemented")
+        with sqlite3.connect(self._database_file) as connection:
+            connection.cursor().execute(f"""
+                    INSERT INTO items (identifier, value)
+                    VALUES ('{item.id}', '{item.value}');
+            """)
 
     def retrieve_all(self) -> Set[UUID]:
-        raise NotImplementedError(f"{ItemPersistence.__name__}.save has not been implemented")
+        with sqlite3.connect(self._database_file) as connection:
+            results = connection.cursor().execute(f"""
+                    SELECT identifier FROM items;
+            """)
+            return {
+                UUID(uuid) for uuid, in results
+            }
 
     def retrieve(self, id: UUID) -> Item:
         raise NotImplementedError(f"{ItemPersistence.__name__}.retrieve has not been implemented")

@@ -1,4 +1,5 @@
 from logging import warning
+from uuid import uuid4
 
 from kirypto.basic_data_store.application.factories import construct_item_persistence
 from kirypto.basic_data_store.application.persistence import ItemPersistence
@@ -15,9 +16,11 @@ class BasicDataStoreApp:
         self._item_persistence = construct_item_persistence(**database_config)
 
     def run(self) -> None:
-        item = Item(id="abad1dea-0000-0000-0000-000000000000", value="Value")
+        item = Item(id=str(uuid4()), value="Value")
         print(f"Attempting to save Item '{item}' to the database. (should fail: not implemented)")
+        self._item_persistence.save(item)
         try:
-            self._item_persistence.save(item)
+            ids = self._item_persistence.retrieve_all()
+            print(f"~~> Retrieved ids: {ids}")
         except NotImplementedError as e:
             print(f"~~> Got expected NIE: {e}")

@@ -1,4 +1,7 @@
+from json import dumps
 from logging import warning
+from random import choices
+from string import ascii_letters
 from uuid import uuid4
 
 from kirypto.basic_data_store.application.factories import construct_item_persistence
@@ -16,11 +19,18 @@ class BasicDataStoreApp:
         self._item_persistence = construct_item_persistence(**database_config)
 
     def run(self) -> None:
-        item = Item(id=str(uuid4()), value="Value")
-        print(f"Attempting to save Item '{item}' to the database. (should fail: not implemented)")
+        item = Item(
+            id=str(uuid4()),
+            value=dumps({random_string(3): random_string(5)})
+        )
+        print(f"~~> Attempting to save new Item '{item}' to the database. (should fail: not implemented)")
         self._item_persistence.save(item)
-        try:
-            ids = self._item_persistence.retrieve_all()
-            print(f"~~> Retrieved ids: {ids}")
-        except NotImplementedError as e:
-            print(f"~~> Got expected NIE: {e}")
+        ids = self._item_persistence.retrieve_all()
+        print(f"~~> Retrieved {len(ids)} ids: {ids}")
+        first_id, *_ = ids
+        retrieved_item = self._item_persistence.retrieve(first_id)
+        print(f"~~> Retrieved item: {retrieved_item}")
+
+
+def random_string(count: int) -> str:
+    return "".join(choices(ascii_letters, k=count))

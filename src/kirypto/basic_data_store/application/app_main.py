@@ -4,6 +4,9 @@ from random import choices
 from string import ascii_letters
 from uuid import uuid4
 
+from flask import Flask
+from waitress import serve
+
 from kirypto.basic_data_store.application.factories import construct_item_persistence
 from kirypto.basic_data_store.application.persistence import ItemPersistence
 from kirypto.basic_data_store.domain.objects import Item
@@ -33,6 +36,15 @@ class BasicDataStoreApp:
         self._item_persistence.delete(retrieved_item.id)
         post_deletion_count = len(self._item_persistence.retrieve_all())
         print(f"~~> Deleted {retrieved_item.id}, now only {post_deletion_count} remain")
+
+        print("######################  FLASK  ######################")
+
+        flask_web_app = Flask(__name__)
+
+        @flask_web_app.route("/")
+        def main_page_handler():
+            return '<div style="background-color: #585454; width: 100%; height: 100%;"><h1>Hello, World!</h1></div>'
+        serve(flask_web_app, **{"host": "0.0.0.0", "port": 5000})
 
 
 def random_string(count: int) -> str:

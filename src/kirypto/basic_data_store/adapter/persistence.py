@@ -10,11 +10,17 @@ from kirypto.basic_data_store.domain.objects import Item
 class Sqlite3ItemPersistence(ItemPersistence):
     _database_file: str
     _item_insert_query: str
+    _item_retrieve_all_query: str
+    _item_retrieve_query: str
+    _item_delete_query: str
 
     def __init__(self, *, database_file: str) -> None:
         self._database_file = database_file
         sqlite3_queries_dir = Path(__file__).parent.joinpath("sqlite3_queries")
         self._item_insert_query = sqlite3_queries_dir.joinpath("item_insert.sql").read_text()
+        self._item_retrieve_all_query = sqlite3_queries_dir.joinpath("item_retrieve_all.sql").read_text()
+        self._item_retrieve_query = sqlite3_queries_dir.joinpath("item_retrieve.sql").read_text()
+        self._item_delete_query = sqlite3_queries_dir.joinpath("item_delete.sql").read_text()
 
     def save(self, item: Item) -> None:
         with sqlite3.connect(self._database_file) as connection:
@@ -22,25 +28,16 @@ class Sqlite3ItemPersistence(ItemPersistence):
 
     def retrieve_all(self) -> Set[UUID]:
         with sqlite3.connect(self._database_file) as connection:
-            results = connection.cursor().execute(f"""
-                    SELECT identifier FROM items;
-            """).fetchall()
             return {
-                UUID(uuid) for uuid, in results
+                UUID(uuid)
+                for uuid, in connection.cursor().execute(self._item_retrieve_all_query).fetchall()
             }
 
     def retrieve(self, id: UUID) -> Item:
         with sqlite3.connect(self._database_file) as connection:
-            results = connection.cursor().execute(f"""
-                    SELECT * FROM items
-                    WHERE identifier = '{str(id)}';
-            """).fetchone()
-            identifier, value = results
+            identifier, value = connection.cursor().execute(self._item_retrieve_query, {"id": str(id)}).fetchone()
             return Item(id=identifier, value=value)
 
     def delete(self, id: UUID) -> None:
         with sqlite3.connect(self._database_file) as connection:
-            connection.cursor().execute(f"""
-                    DELETE FROM items
-                    WHERE identifier = '{str(id)}';
-            """)
+            connection.cursor().execute(self._item_delete_query, {"id": str(id)})

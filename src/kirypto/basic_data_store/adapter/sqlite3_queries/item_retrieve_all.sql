@@ -1,0 +1,1 @@
+SELECT identifier FROM items;

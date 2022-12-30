@@ -20,7 +20,6 @@ class Item(dict):
         _validate_domain_object(self, expected_member_types_by_name=dict(
             id=UUID,
             value=str,
-
         ))
 
     @property

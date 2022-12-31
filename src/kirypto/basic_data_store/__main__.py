@@ -1,3 +1,4 @@
+from logging import basicConfig, INFO
 from pathlib import Path
 from typing import Dict, Any
 from argparse import ArgumentParser
@@ -8,6 +9,7 @@ from kirypto.basic_data_store.application.app_main import BasicDataStoreApp
 
 
 def _main() -> None:
+    basicConfig(level=INFO)
     kwargs = _parse_args()
     app_args = kwargs.pop("config")
     try:

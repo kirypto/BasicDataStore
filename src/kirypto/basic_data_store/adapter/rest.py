@@ -1,5 +1,6 @@
 from collections import defaultdict
 from functools import wraps
+from logging import info
 from typing import Dict, Callable
 
 from flask import Flask, Response, make_response, request
@@ -11,10 +12,14 @@ from kirypto.basic_data_store.application.rest import RestServer, HandlerRegiste
 class FlaskRestServer(RestServer):
     _is_listening: bool
     _routes: Dict[str, Dict[RestMethod, Callable]]
+    _host: str
+    _port: int
 
-    def __init__(self) -> None:
+    def __init__(self, *, host: str, port: int) -> None:
         self._is_listening = False
         self._routes = defaultdict(dict)
+        self._host = host
+        self._port = port
 
     def register_rest_endpoint(
             self, route: str, method: str, response_type: str = "application/json",
@@ -69,4 +74,7 @@ class FlaskRestServer(RestServer):
 
             flask_web_app.add_url_rule(route, route, route_handler, methods=[method for method in method_handler_dict.keys()])
 
-        serve(flask_web_app, **{"host": "0.0.0.0", "port": 5000})
+        # noinspection HttpUrlsUsage
+        url = f"http://{self._host}:{self._port}" if self._host != "0.0.0.0" else f"http://localhost:{self._port}"
+        info(f"Serving on {url}")
+        serve(flask_web_app, host=self._host, port=self._port)

@@ -6,7 +6,7 @@ from typing import Dict, Callable
 from flask import Flask, Response, make_response, request
 from waitress import serve
 
-from kirypto.basic_data_store.application.rest import RestServer, HandlerRegisterer, RestMethod, RequestHandler, HandlerResult
+from kirypto.basic_data_store.application.rest import RestServer, HandlerRegisterer, RestMethod, RequestHandler, HandlerResult, with_error_response_on_raised_exceptions
 
 
 class FlaskRestServer(RestServer):
@@ -43,6 +43,7 @@ class FlaskRestServer(RestServer):
                 return wrapper
 
             @convert_to_flask_response
+            @with_error_response_on_raised_exceptions
             @wraps(handler_func)
             def handler_wrapper(**kwargs) -> HandlerResult:
                 args = []

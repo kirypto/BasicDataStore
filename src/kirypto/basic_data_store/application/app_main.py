@@ -7,6 +7,7 @@ from uuid import uuid4
 from kirypto.basic_data_store.application.factories import construct_item_persistence, construct_rest_server
 from kirypto.basic_data_store.application.persistence import ItemPersistence
 from kirypto.basic_data_store.application.rest import RestServer, HandlerResult
+from kirypto.basic_data_store.application.routes import register_item_routes
 from kirypto.basic_data_store.domain.objects import Item
 
 
@@ -40,6 +41,8 @@ class BasicDataStoreApp:
         @self._rest_server.register_rest_endpoint("/", "get", "text/html")
         def main_page_handler() -> HandlerResult:
             return 200, '<div style="background-color: #585454; width: 100%; height: 100%;"><h1>Hello, World!</h1></div>'
+
+        register_item_routes(self._rest_server)
 
         self._rest_server.listen()
 

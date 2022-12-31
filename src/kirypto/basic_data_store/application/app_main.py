@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from kirypto.basic_data_store.application.factories import construct_item_persistence, construct_rest_server
 from kirypto.basic_data_store.application.persistence import ItemPersistence
-from kirypto.basic_data_store.application.rest import RestServer
+from kirypto.basic_data_store.application.rest import RestServer, HandlerResult
 from kirypto.basic_data_store.domain.objects import Item
 
 
@@ -36,6 +36,11 @@ class BasicDataStoreApp:
         self._item_persistence.delete(retrieved_item.id)
         post_deletion_count = len(self._item_persistence.retrieve_all())
         print(f"~~> Deleted {retrieved_item.id}, now only {post_deletion_count} remain")
+
+        @self._rest_server.register_rest_endpoint("/", "get", "text/html")
+        def main_page_handler() -> HandlerResult:
+            return 200, '<div style="background-color: #585454; width: 100%; height: 100%;"><h1>Hello, World!</h1></div>'
+
         self._rest_server.listen()
 
 

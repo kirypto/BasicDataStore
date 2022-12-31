@@ -4,22 +4,22 @@ from random import choices
 from string import ascii_letters
 from uuid import uuid4
 
-from flask import Flask
-from waitress import serve
-
-from kirypto.basic_data_store.application.factories import construct_item_persistence
+from kirypto.basic_data_store.application.factories import construct_item_persistence, construct_rest_server
 from kirypto.basic_data_store.application.persistence import ItemPersistence
+from kirypto.basic_data_store.application.rest import RestServer
 from kirypto.basic_data_store.domain.objects import Item
 
 
 class BasicDataStoreApp:
     _item_persistence: ItemPersistence
+    _rest_server: RestServer
 
-    def __init__(self, *, database_config: dict, **kwargs) -> None:
+    def __init__(self, *, database_config: dict, rest_server_config: dict, **kwargs) -> None:
         if kwargs:
             warning(f"Received unwanted keyword arguments: {{{', '.join(kwargs.keys())}}}; ignoring.")
 
         self._item_persistence = construct_item_persistence(**database_config)
+        self._rest_server = construct_rest_server(**rest_server_config)
 
     def run(self) -> None:
         item = Item(
@@ -36,15 +36,7 @@ class BasicDataStoreApp:
         self._item_persistence.delete(retrieved_item.id)
         post_deletion_count = len(self._item_persistence.retrieve_all())
         print(f"~~> Deleted {retrieved_item.id}, now only {post_deletion_count} remain")
-
-        print("######################  FLASK  ######################")
-
-        flask_web_app = Flask(__name__)
-
-        @flask_web_app.route("/")
-        def main_page_handler():
-            return '<div style="background-color: #585454; width: 100%; height: 100%;"><h1>Hello, World!</h1></div>'
-        serve(flask_web_app, **{"host": "0.0.0.0", "port": 5000})
+        self._rest_server.listen()
 
 
 def random_string(count: int) -> str:

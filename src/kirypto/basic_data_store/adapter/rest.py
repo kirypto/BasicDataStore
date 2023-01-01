@@ -64,7 +64,6 @@ class FlaskRestServer(RestServer):
             raise ValueError("Rest server is already listening.")
 
         self._is_listening = True
-        print("######################  FLASK  ######################")
         flask_web_app = Flask(__name__)
 
         for route, method_handler_dict in self._routes.items():

@@ -1,4 +1,5 @@
-from uuid import uuid4
+from typing import Set
+from uuid import uuid4, UUID
 
 from kirypto.basic_data_store.application.persistence import ItemPersistence
 from kirypto.basic_data_store.domain.objects import JSONObject, Item
@@ -14,3 +15,9 @@ class ItemFacade:
         item = Item(id=(str(uuid4())), value=value)
         self._item_persistence.save(item)
         return item
+
+    def get_item_ids(self) -> Set[UUID]:
+        return self._item_persistence.retrieve_all()
+
+    def get_item(self, id: UUID) -> Item:
+        return self._item_persistence.retrieve(id)

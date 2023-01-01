@@ -3,6 +3,7 @@ from random import choices
 from string import ascii_letters
 from uuid import uuid4
 
+from kirypto.basic_data_store.application.facades import ItemFacade
 from kirypto.basic_data_store.application.factories import construct_item_persistence, construct_rest_server
 from kirypto.basic_data_store.application.persistence import ItemPersistence
 from kirypto.basic_data_store.application.rest import RestServer, HandlerResult
@@ -13,6 +14,7 @@ from kirypto.basic_data_store.domain.objects import Item
 class BasicDataStoreApp:
     _item_persistence: ItemPersistence
     _rest_server: RestServer
+    _item_facade: ItemFacade
 
     def __init__(self, *, database_config: dict, rest_server_config: dict, **kwargs) -> None:
         if kwargs:
@@ -20,6 +22,8 @@ class BasicDataStoreApp:
 
         self._item_persistence = construct_item_persistence(**database_config)
         self._rest_server = construct_rest_server(**rest_server_config)
+
+        self._item_facade = ItemFacade(self._item_persistence)
 
     def run(self) -> None:
         item = Item(
@@ -41,7 +45,7 @@ class BasicDataStoreApp:
         def main_page_handler() -> HandlerResult:
             return 200, '<div style="background-color: #585454; width: 100%; height: 100%;"><h1>Hello, World!</h1></div>'
 
-        register_item_routes(self._rest_server)
+        register_item_routes(self._rest_server, self._item_facade)
 
         self._rest_server.listen()
 

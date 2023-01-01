@@ -1,15 +1,18 @@
 from http import HTTPStatus
-from logging import warning
+from json import dumps
+from logging import warning, info
 from typing import Any
 
 from kirypto.basic_data_store.application.rest import RestServer, HandlerResult
+from kirypto.basic_data_store.application.facades import ItemFacade
 
 
-def register_item_routes(rest_server: RestServer) -> None:
+def register_item_routes(rest_server: RestServer, item_facade: ItemFacade) -> None:
     @rest_server.register_rest_endpoint("/api/item", "post", json=True)
     def post_item(body: Any) -> HandlerResult:
-        warning(f"POST /api/item not yet implemented")
-        return HTTPStatus.NOT_IMPLEMENTED, "Not Yet Implemented"
+        item = item_facade.create_item(body)
+        info(f"Created new item {item.id}")
+        return HTTPStatus.CREATED, dumps(item)
 
     @rest_server.register_rest_endpoint("/api/items", "get")
     def get_items() -> HandlerResult:

@@ -31,7 +31,7 @@ class BasicDataStoreApp:
             value={random_string(3): random_string(5)}
         )
         print(f"~~> Attempting to save new Item '{item}' to the database. (should fail: not implemented)")
-        self._item_persistence.save(item)
+        self._item_persistence.create(item)
         ids = self._item_persistence.retrieve_all()
         print(f"~~> Retrieved {len(ids)} ids: {ids}")
         first_id, *_ = ids

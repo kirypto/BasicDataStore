@@ -13,7 +13,7 @@ class ItemFacade:
 
     def create_item(self, value: JSONObject) -> Item:
         item = Item(id=(str(uuid4())), value=value)
-        self._item_persistence.save(item)
+        self._item_persistence.create(item)
         return item
 
     def get_item_ids(self) -> Set[UUID]:

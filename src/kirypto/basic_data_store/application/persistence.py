@@ -10,7 +10,7 @@ TId = TypeVar("TId")
 
 class ItemPersistence(ABC):
     @abstractmethod
-    def save(self, item: Item) -> None:
+    def create(self, item: Item) -> None:
         pass
 
     @abstractmethod

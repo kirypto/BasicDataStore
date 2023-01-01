@@ -23,7 +23,7 @@ class Sqlite3ItemPersistence(ItemPersistence):
         self._item_retrieve_query = sqlite3_queries_dir.joinpath("item_retrieve.sql").read_text()
         self._item_delete_query = sqlite3_queries_dir.joinpath("item_delete.sql").read_text()
 
-    def save(self, item: Item) -> None:
+    def create(self, item: Item) -> None:
         item_to_save = {
             **item,
             "value": dumps(item["value"])

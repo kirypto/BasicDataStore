@@ -1,11 +1,12 @@
 from http import HTTPStatus
 from json import dumps
-from logging import warning, info
+from logging import info
 from typing import Any
 from uuid import UUID
 
 from kirypto.basic_data_store.application.facades import ItemFacade
 from kirypto.basic_data_store.application.rest import RestServer, HandlerResult
+from kirypto.basic_data_store.domain.objects import Item
 
 
 def register_item_routes(rest_server: RestServer, item_facade: ItemFacade) -> None:
@@ -29,5 +30,7 @@ def register_item_routes(rest_server: RestServer, item_facade: ItemFacade) -> No
 
     @rest_server.register_rest_endpoint("/api/item/<item_id>", "put", json=True)
     def get_item_id(body: Any, *, item_id: str) -> HandlerResult:
-        warning(f"PUT /api/item/<item_id> not yet implemented")
-        return HTTPStatus.NOT_IMPLEMENTED, "Not Yet Implemented"
+        item = Item(id=item_id, value=body)
+        item_facade.update_item(item)
+        info(f"PUT /api/item/<item_id> invoked; updated item: {item.id}")
+        return HTTPStatus.OK, dumps(item)

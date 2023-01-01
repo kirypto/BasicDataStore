@@ -14,6 +14,7 @@ class Sqlite3ItemPersistence(ItemPersistence):
     _item_retrieve_all_query: str
     _item_retrieve_query: str
     _item_delete_query: str
+    _item_update_query: str
 
     def __init__(self, *, database_file: str) -> None:
         self._database_file = database_file
@@ -22,6 +23,7 @@ class Sqlite3ItemPersistence(ItemPersistence):
         self._item_retrieve_all_query = sqlite3_queries_dir.joinpath("item_retrieve_all.sql").read_text()
         self._item_retrieve_query = sqlite3_queries_dir.joinpath("item_retrieve.sql").read_text()
         self._item_delete_query = sqlite3_queries_dir.joinpath("item_delete.sql").read_text()
+        self._item_update_query = sqlite3_queries_dir.joinpath("item_update.sql").read_text()
 
     def create(self, item: Item) -> None:
         item_to_save = {
@@ -42,6 +44,14 @@ class Sqlite3ItemPersistence(ItemPersistence):
         with sqlite3.connect(self._database_file) as connection:
             identifier, value = connection.cursor().execute(self._item_retrieve_query, {"id": str(id)}).fetchone()
             return Item(id=identifier, value=loads(value))
+
+    def update(self, item: Item) -> None:
+        item_to_save = {
+            **item,
+            "value": dumps(item["value"])
+        }
+        with sqlite3.connect(self._database_file) as connection:
+            connection.cursor().execute(self._item_update_query, item_to_save)
 
     def delete(self, id: UUID) -> None:
         with sqlite3.connect(self._database_file) as connection:

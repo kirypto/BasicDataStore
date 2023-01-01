@@ -21,3 +21,6 @@ class ItemFacade:
 
     def get_item(self, id: UUID) -> Item:
         return self._item_persistence.retrieve(id)
+
+    def update_item(self, item: Item) -> None:
+        self._item_persistence.update(item)

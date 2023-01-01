@@ -22,5 +22,9 @@ class ItemPersistence(ABC):
         pass
 
     @abstractmethod
+    def update(self, item: Item) -> None:
+        pass
+
+    @abstractmethod
     def delete(self, id: UUID) -> None:
         pass

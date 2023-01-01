@@ -1,4 +1,3 @@
-from json import dumps
 from logging import warning
 from random import choices
 from string import ascii_letters
@@ -25,7 +24,7 @@ class BasicDataStoreApp:
     def run(self) -> None:
         item = Item(
             id=str(uuid4()),
-            value=dumps({random_string(3): random_string(5)})
+            value={random_string(3): random_string(5)}
         )
         print(f"~~> Attempting to save new Item '{item}' to the database. (should fail: not implemented)")
         self._item_persistence.save(item)

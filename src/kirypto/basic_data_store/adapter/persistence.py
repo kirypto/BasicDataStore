@@ -1,4 +1,5 @@
 import sqlite3
+from json import dumps, loads
 from pathlib import Path
 from typing import Set
 from uuid import UUID
@@ -23,8 +24,12 @@ class Sqlite3ItemPersistence(ItemPersistence):
         self._item_delete_query = sqlite3_queries_dir.joinpath("item_delete.sql").read_text()
 
     def save(self, item: Item) -> None:
+        item_to_save = {
+            **item,
+            "value": dumps(item["value"])
+        }
         with sqlite3.connect(self._database_file) as connection:
-            connection.cursor().execute(self._item_insert_query, item)
+            connection.cursor().execute(self._item_insert_query, item_to_save)
 
     def retrieve_all(self) -> Set[UUID]:
         with sqlite3.connect(self._database_file) as connection:
@@ -36,7 +41,7 @@ class Sqlite3ItemPersistence(ItemPersistence):
     def retrieve(self, id: UUID) -> Item:
         with sqlite3.connect(self._database_file) as connection:
             identifier, value = connection.cursor().execute(self._item_retrieve_query, {"id": str(id)}).fetchone()
-            return Item(id=identifier, value=value)
+            return Item(id=identifier, value=loads(value))
 
     def delete(self, id: UUID) -> None:
         with sqlite3.connect(self._database_file) as connection:

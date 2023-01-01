@@ -12,31 +12,36 @@ from kirypto.basic_data_store.domain.objects import Item
 def register_item_routes(rest_server: RestServer, item_facade: ItemFacade) -> None:
     @rest_server.register_rest_endpoint("/api/item", "post", json=True)
     def post_item(body: Any) -> HandlerResult:
+        info(f"POST /api/item invoked")
         item = item_facade.create_item(body)
-        info(f"POST /api/item invoked; created new item: {item.id}")
+        info(f"Created new item: {item.id}")
         return HTTPStatus.CREATED, dumps(item)
 
     @rest_server.register_rest_endpoint("/api/items", "get")
     def get_items() -> HandlerResult:
+        info(f"GET /api/items invoked")
         ids = item_facade.get_item_ids()
-        info(f"GET /api/items invoked; returning {len(ids)} ids")
+        info(f"Returning {len(ids)} ids")
         return HTTPStatus.OK, dumps([str(id) for id in ids])
 
     @rest_server.register_rest_endpoint("/api/item/<item_id>", "get")
     def get_item_id(*, item_id: str) -> HandlerResult:
+        info(f"GET /api/item/<item_id> invoked with id '{item_id}'")
         item = item_facade.get_item(UUID(item_id))
-        info(f"GET /api/item/<item_id> invoked; returning item: {item.id}")
+        info(f"Returning item: {item.id}")
         return HTTPStatus.OK, dumps(item)
 
     @rest_server.register_rest_endpoint("/api/item/<item_id>", "put", json=True)
     def get_item_id(body: Any, *, item_id: str) -> HandlerResult:
+        info(f"PUT /api/item/<item_id> invoked with id '{item_id}'")
         item = Item(id=item_id, value=body)
         item_facade.update_item(item)
-        info(f"PUT /api/item/<item_id> invoked; updated item: {item.id}")
+        info(f"Updated item: {item.id}")
         return HTTPStatus.OK, dumps(item)
 
     @rest_server.register_rest_endpoint("/api/item/<item_id>", "delete")
     def delete_item_id(*, item_id: str) -> HandlerResult:
+        info(f"DELETE /api/item/<item_id> invoked with id '{item_id}'")
         item_facade.delete(UUID(item_id))
-        info(f"DELETE /api/item/<item_id> invoked; removed item: {item_id}")
+        info(f"Removed item: {item_id}")
         return HTTPStatus.NO_CONTENT, ""

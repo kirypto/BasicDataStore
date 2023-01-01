@@ -34,3 +34,9 @@ def register_item_routes(rest_server: RestServer, item_facade: ItemFacade) -> No
         item_facade.update_item(item)
         info(f"PUT /api/item/<item_id> invoked; updated item: {item.id}")
         return HTTPStatus.OK, dumps(item)
+
+    @rest_server.register_rest_endpoint("/api/item/<item_id>", "delete")
+    def delete_item_id(*, item_id: str) -> HandlerResult:
+        item_facade.delete(UUID(item_id))
+        info(f"DELETE /api/item/<item_id> invoked; removed item: {item_id}")
+        return HTTPStatus.NO_CONTENT, ""

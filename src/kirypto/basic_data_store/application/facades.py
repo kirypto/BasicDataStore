@@ -24,3 +24,6 @@ class ItemFacade:
 
     def update_item(self, item: Item) -> None:
         self._item_persistence.update(item)
+
+    def delete(self, id: UUID) -> None:
+        self._item_persistence.delete(id)

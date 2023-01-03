@@ -7,6 +7,7 @@ from flask import Flask, Response, make_response, request
 from waitress import serve
 
 from kirypto.basic_data_store.application.rest import RestServer, HandlerRegisterer, RestMethod, RequestHandler, HandlerResult, with_error_response_on_raised_exceptions
+from kirypto.basic_data_store.domain.exceptions import AuthError
 
 
 class FlaskRestServer(RestServer):
@@ -23,7 +24,7 @@ class FlaskRestServer(RestServer):
 
     def register_rest_endpoint(
             self, route: str, method: str, response_type: str = "application/json",
-            *, json: bool = False, query_params: bool = False
+            *, json: bool = False, query_params: bool = False, auth_token: bool = False
     ) -> HandlerRegisterer:
         if self._is_listening:
             raise ValueError("Cannot register, controller has already been finalized.")
@@ -53,6 +54,10 @@ class FlaskRestServer(RestServer):
                     args.append(request.json)
                 if query_params:
                     args.append(dict(request.args))
+                if auth_token:
+                    if "Authorization" not in request.headers:
+                        raise AuthError(f"{method} {route} requires auth but no Authorization was header provided")
+                    args.append(request.headers["Authorization"])
 
                 return handler_func(*args, **kwargs)
 

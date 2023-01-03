@@ -4,6 +4,8 @@ from json import dumps
 from logging import exception
 from typing import Callable, Tuple, Union
 
+from kirypto.basic_data_store.domain.exceptions import AuthError
+
 StatusCode = int
 RestMethod = str
 HandlerResult = Tuple[StatusCode, str]
@@ -15,7 +17,7 @@ class RestServer(ABC):
     @abstractmethod
     def register_rest_endpoint(
             self, route: str, method: RestMethod, response_type: str = "application/json",
-            *, json: bool = False, query_params: bool = False
+            *, json: bool = False, query_params: bool = False, auth_token: bool = False,
     ) -> HandlerRegisterer:
         pass
 
@@ -44,6 +46,9 @@ def with_error_response_on_raised_exceptions(handler_function: RequestHandler) -
         except NotImplementedError as e:
             exception(e, exc_info=e)
             return error_response(e, HTTPStatus.NOT_IMPLEMENTED)
+        except AuthError as e:
+            exception(e, exc_info=e)
+            return error_response(e, HTTPStatus.FORBIDDEN)
         except BaseException as e:
             exception(e, exc_info=e)
             return error_response(e, HTTPStatus.INTERNAL_SERVER_ERROR)

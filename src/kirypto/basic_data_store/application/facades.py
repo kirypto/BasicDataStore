@@ -1,8 +1,9 @@
-from typing import Set
+from functools import wraps
+from typing import Set, Callable
 from uuid import uuid4, UUID
 
-from kirypto.basic_data_store.application.persistence import ItemPersistence
-from kirypto.basic_data_store.domain.objects import JSONObject, Item
+from kirypto.basic_data_store.application.persistence import ItemPersistence, AuthPersistence
+from kirypto.basic_data_store.domain.objects import JSONObject, Item, AuthTokenName
 
 
 class ItemFacade:
@@ -27,3 +28,19 @@ class ItemFacade:
 
     def delete(self, id: UUID) -> None:
         self._item_persistence.delete(id)
+
+
+class AuthFacade:
+    _auth_persistence: AuthPersistence
+
+    def __init__(self, auth_persistence: AuthPersistence) -> None:
+        self._auth_persistence = auth_persistence
+
+    def translate_auth_param(self, function: Callable) -> Callable:
+        @wraps(function)
+        def wrapper(*args, **kwargs):
+            *other_args, auth_token = args
+            auth_token_name: AuthTokenName = self._auth_persistence.retrieve(auth_token)
+            return function(*other_args, auth_token_name, **kwargs)
+
+        return wrapper

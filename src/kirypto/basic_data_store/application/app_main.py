@@ -2,27 +2,26 @@ from logging import warning
 from random import choices
 from string import ascii_letters
 
-from kirypto.basic_data_store.application.facades import ItemFacade
+from kirypto.basic_data_store.application.facades import ItemFacade, AuthFacade
 from kirypto.basic_data_store.application.factories import construct_rest_server, construct_persistence
-from kirypto.basic_data_store.application.persistence import ItemPersistence, AuthPersistence
 from kirypto.basic_data_store.application.rest import RestServer, HandlerResult
 from kirypto.basic_data_store.application.routes import register_item_routes
 
 
 class BasicDataStoreApp:
-    _item_persistence: ItemPersistence
-    _auth_persistence: AuthPersistence
     _rest_server: RestServer
     _item_facade: ItemFacade
+    _auth_facade: AuthFacade
 
     def __init__(self, *, persistence_config: dict, rest_server_config: dict, **kwargs) -> None:
         if kwargs:
             warning(f"Received unwanted keyword arguments: {{{', '.join(kwargs.keys())}}}; ignoring.")
 
-        self._item_persistence, self._auth_persistence = construct_persistence(**persistence_config)
+        item_persistence, auth_persistence = construct_persistence(**persistence_config)
         self._rest_server = construct_rest_server(**rest_server_config)
 
-        self._item_facade = ItemFacade(self._item_persistence)
+        self._item_facade = ItemFacade(item_persistence)
+        self._auth_facade = AuthFacade(auth_persistence)
 
     def run(self) -> None:
         @self._rest_server.register_rest_endpoint("/", "get", "text/html")
@@ -43,7 +42,7 @@ class BasicDataStoreApp:
             </body>
             """
 
-        register_item_routes(self._rest_server, self._item_facade, self._auth_persistence)
+        register_item_routes(self._rest_server, self._item_facade, self._auth_facade)
 
         self._rest_server.listen()
 

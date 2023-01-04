@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import Set
 from uuid import UUID
 
-from kirypto.basic_data_store.application.persistence import ItemPersistence
-from kirypto.basic_data_store.domain.objects import Item
+from kirypto.basic_data_store.application.persistence import ItemPersistence, AuthPersistence
+from kirypto.basic_data_store.domain.exceptions import AuthError
+from kirypto.basic_data_store.domain.objects import Item, AuthToken, AuthTokenName
 
 
 class Sqlite3ItemPersistence(ItemPersistence):
@@ -56,3 +57,20 @@ class Sqlite3ItemPersistence(ItemPersistence):
     def delete(self, id: UUID) -> None:
         with sqlite3.connect(self._database_file) as connection:
             connection.cursor().execute(self._item_delete_query, {"id": str(id)})
+
+
+class Sqlite3AuthPersistence(AuthPersistence):
+    _database_file: str
+    _auth_retrieve_query: str
+
+    def __init__(self, *, database_file: str) -> None:
+        self._database_file = database_file
+        sqlite3_queries_dir = Path(__file__).parent.joinpath("sqlite3_queries")
+        self._auth_retrieve_query = sqlite3_queries_dir.joinpath("auth_retrieve.sql").read_text()
+
+    def retrieve(self, token: AuthToken) -> AuthTokenName:
+        with sqlite3.connect(self._database_file) as connection:
+            result = connection.cursor().execute(self._auth_retrieve_query, {"token": token}).fetchone()
+            if result is None:
+                raise AuthError("Invalid auth token")
+            return result[0]

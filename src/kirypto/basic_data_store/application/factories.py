@@ -1,14 +1,25 @@
 from importlib import import_module
-from typing import TypeVar, Type
+from typing import TypeVar, Type, Tuple
 
-from kirypto.basic_data_store.application.persistence import ItemPersistence
+from kirypto.basic_data_store.application.persistence import ItemPersistence, AuthPersistence
 from kirypto.basic_data_store.application.rest import RestServer
 
 _TClass = TypeVar("_TClass")
 
 
+def construct_persistence(*, item_config: dict, auth_config: dict) -> Tuple[ItemPersistence, AuthPersistence]:
+    return (
+        construct_item_persistence(**item_config),
+        construct_auth_persistence(**auth_config),
+    )
+
+
 def construct_item_persistence(*, class_path: str, class_args: dict) -> ItemPersistence:
     return _load_class(class_path, class_args, ItemPersistence)
+
+
+def construct_auth_persistence(*, class_path: str, class_args: dict) -> AuthPersistence:
+    return _load_class(class_path, class_args, AuthPersistence)
 
 
 def construct_rest_server(*, class_path: str, class_args: dict) -> RestServer:

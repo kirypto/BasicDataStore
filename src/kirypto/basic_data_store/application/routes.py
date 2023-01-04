@@ -5,14 +5,16 @@ from typing import Any
 from uuid import UUID
 
 from kirypto.basic_data_store.application.facades import ItemFacade
+from kirypto.basic_data_store.application.persistence import AuthPersistence
 from kirypto.basic_data_store.application.rest import RestServer, HandlerResult
 from kirypto.basic_data_store.domain.objects import Item
 
 
-def register_item_routes(rest_server: RestServer, item_facade: ItemFacade) -> None:
+def register_item_routes(rest_server: RestServer, item_facade: ItemFacade, auth_persistence: AuthPersistence) -> None:
     @rest_server.register_rest_endpoint("/api/item", "post", json=True, auth_token=True)
-    def post_item(body: Any, _auth_token: str) -> HandlerResult:
-        info(f"POST /api/item invoked")
+    def post_item(body: Any, auth_token: str) -> HandlerResult:
+        auth_token_name = auth_persistence.retrieve(auth_token)
+        info(f"POST /api/item invoked with token '{auth_token_name}'")
         item = item_facade.create_item(body)
         info(f"Created new item: {item.id}")
         return HTTPStatus.CREATED, dumps(item)

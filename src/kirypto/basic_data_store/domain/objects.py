@@ -15,6 +15,8 @@ def _validate_domain_object(domain_object: Any, *, expected_member_types_by_name
 
 
 JSONObject = Union[str, int, float, list, dict]
+AuthToken = str
+AuthTokenName = str
 
 
 class Item(dict):

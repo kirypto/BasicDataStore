@@ -57,7 +57,9 @@ class FlaskRestServer(RestServer):
                 if auth_token:
                     if "Authorization" not in request.headers:
                         raise AuthError(f"{method} {route} requires auth but no Authorization was header provided")
-                    args.append(request.headers["Authorization"])
+                    elif not request.headers["Authorization"].startswith("Bearer "):
+                        raise AuthError(f"{method} {route} requires auth but no Authorization was header provided")
+                    args.append(request.headers["Authorization"].removeprefix("Bearer "))
 
                 return handler_func(*args, **kwargs)
 
